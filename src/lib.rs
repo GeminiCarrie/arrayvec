@@ -19,14 +19,24 @@
 //! This version of arrayvec requires Rust 1.36 or later.
 //!
 #![doc(html_root_url="https://docs.rs/arrayvec/0.4/")]
-#![cfg_attr(not(feature="std"), no_std)]
-#![cfg_attr(has_union_feature, feature(untagged_unions))]
+#![cfg_attr(any(not(feature = "std"),
+                all(feature = "mesalock_sgx",
+                    not(target_env = "sgx"))), no_std)]
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))]
+
+#[cfg(all(feature = "std",
+          not(all(feature = "mesalock_sgx",
+                  not(target_env = "sgx")))))]
+extern crate core;
+
+#[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
+extern crate sgx_tstd as std;
 
 #[cfg(feature="serde-1")]
 extern crate serde;
 
-#[cfg(not(feature="std"))]
-extern crate core as std;
+// #[cfg(not(feature="std"))]
+// extern crate core as std;
 
 use std::cmp;
 use std::iter;
